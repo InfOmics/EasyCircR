@@ -1,0 +1,96 @@
+#mytable .shadow:hover {
+  -moz-box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  cursor: pointer;
+}
+
+#mytable table.data {
+  height:100%;
+  width:100%;
+  table-layout:fixed;
+}
+
+#mytable table.data td {
+  text-align: center;
+  vertical-align: middle;
+  width: 33.33%;
+  height: 250px;
+}
+
+#mytable td img {
+  max-height: 250px;
+  max-width: 100%;
+}
+
+#mytable {
+  width: 100%;
+}
+
+#popup {
+  position: relative;
+  left: -11px;
+}
+
+#figImage img {
+  max-width: 100%;
+  height: auto;
+}
+
+#echolog {
+  padding: .5em;
+  border: 1px solid #777;
+  height: 600px;
+  overflow-y: scroll;
+}
+
+
+/* Style the close button (span) */
+.close {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  right: 0%;
+  padding: 12px 16px;
+  transform: translate(0%, -50%);
+}
+
+.close:hover {background: #bbb;}
+
+.sel {
+    background: #2D6A8D;
+    color: white;
+    padding: 5px;
+    border-radius: 24px;
+    font-size: 17px;
+    cursor: pointer;
+    border: 0 solid rgba(0, 0, 0, 0);
+    position: relative;
+    padding-right: 24px !important;
+    display: inline-block;
+    zoom: 1;
+    box-sizing: border-box;
+    line-height: 20px;
+    -webkit-font-smoothing: inherit;
+}
+.remove {
+    color: white;
+    top: 2.5px;
+    right: 2.5px;
+    font-size: 16px;
+    z-index: 1;
+    position: absolute;
+    bottom: 0;
+    width: 17px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/*
+.div.editable {
+    width: 300px;
+    height: 200px;
+    border: 2px solid #ccc;
+    padding: 5px;
+}
+*/

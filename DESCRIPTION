@@ -1,0 +1,63 @@
+Package: EasyCirc
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "First",
+           family = "Last",
+           role = c("aut", "cre"),
+           email = "first.last@example.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+License: `use_mit_license()`, `use_gpl3_license()` or friends to
+    pick a license
+Encoding: UTF-8
+LazyData: false
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Imports:
+    dplyr,
+    GenomicFeatures,
+    eisaR,
+    parallel,
+    QuasR,
+    msigdbr,
+    tools,
+    magrittr,
+    edgeR,
+    limma,
+    R.utils,
+    bedr,
+    multiMiR,
+    msigdbr,
+    ggplot2,
+    Biobase,
+    igraph,
+    network,
+    shiny,
+    shinyjs,
+    shinyAce,
+    shinycssloaders,
+    shinydashboard,
+    shinyBS,
+    shinyalert,
+    rclipboard,
+    writexl,
+    plotly,
+    DT,
+    pdftools,
+    forcats,
+    circlize,
+    markdown,
+    scales,
+    gridExtra,
+    writexl,
+    pdftools,
+    ggrepel,
+    shinycssloaders,
+    shinydashboard,
+    ggnet
+Remotes: 
+  github::briatte/ggnet

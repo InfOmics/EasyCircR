@@ -1,0 +1,748 @@
+suppressPackageStartupMessages(library(shiny))
+suppressPackageStartupMessages(library(markdown)) # includeMarkdown()
+suppressPackageStartupMessages(library(dplyr)) # llply()
+suppressPackageStartupMessages(library(shinyAce)) # updateAceEditor()
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(scales))
+suppressPackageStartupMessages(library(gridExtra))
+suppressPackageStartupMessages(library(DT))
+suppressPackageStartupMessages(library(rclipboard))
+suppressPackageStartupMessages(library(writexl))
+suppressPackageStartupMessages(library(plotly))
+suppressPackageStartupMessages(library(pdftools))
+suppressPackageStartupMessages(library(ggrepel))
+suppressPackageStartupMessages(library(forcats))
+
+#options(scipen = 3)
+#library(shinycssloaders)
+optionstable = list(lengthChange = FALSE, paging = FALSE)
+
+#library(clusterProfiler)
+
+
+colnames_all_tbl = c("circRNA", "miRNA", "symbol", "miRNA family", "validation miRNA-Gene",
+                     "gene logFC", "gene PValue", "database miRNA-Gene", 
+                     "circRNA-miRNA binding start", "circRNA-miRNA binding
+                     end", "type of miRNA target site", "gene set")
+
+downlodable_all_tbl = c("circRNA_id", "mature_mirna_id", "target_symbol",
+                        "mirna_family", "type", "logFC", "PValue", "database",
+                        "Binding_start", "Binding_end", "Site_type",
+                        "category_H")
+
+#--------------------------------------------------------------------------------
+# LOAD DATA
+#--------------------------------------------------------------------------------
+gene_mirna_circ = readRDS("data/geneMirnaCirc.rds")
+gene_mirna_circ = gene_mirna_circ[!is.na(gene_mirna_circ$target_symbol),] #temporary
+gene_mirna_circ = gene_mirna_circ[,-which(colnames(gene_mirna_circ)=="target_ensembl")] #temporary
+
+circRNA_seq = readRDS("data/predictedCircRNAs.rds")
+circRNA_mtx = readRDS("data/countMatrix.rds")
+colnames(circRNA_seq)[colnames(circRNA_seq)=="bsj_id"] = "circRNA_id"
+
+gene_mirna_circ$CIRCRNA_ID = gene_mirna_circ$circRNA_id
+
+# Scientific notation for PValue 5e-2
+gene_mirna_circ$PValue <- formatC(gene_mirna_circ$PValue, digits=2, format="e")
+
+# Link in table
+gene_mirna_circ$circRNA_link = paste0("<a href='javascript:;' id='",gene_mirna_circ$CIRCRNA_ID,"'
+                                      onclick='changeTab(this.id)'>", gene_mirna_circ$CIRCRNA_ID ,"</a>")
+
+gene_mirna_circ <- gene_mirna_circ[,c("circRNA_link", "mature_mirna_id", "target_symbol", "mirna_family", "type",
+                                      "logFC", "PValue", "database", "Binding_start", "Binding_end",
+                                      "Site_type", "category_H", "CIRCRNA_ID", "circRNA_id")]
+
+#--------------------------------------------------------------------------------
+# GENES POST REGULATED
+#--------------------------------------------------------------------------------
+genes = distinct(gene_mirna_circ[,c("target_symbol","logFC","PValue")])
+genes$PValue <- formatC(genes$PValue, digits=2, format="e")
+#--------------------------------------------------------------------------------
+# MIRNA
+#--------------------------------------------------------------------------------
+mirnas = data.frame(mature_mirna_id=unique(gene_mirna_circ[,c("mature_mirna_id")]),dummy=c(1))
+#--------------------------------------------------------------------------------
+# CIRCRNA
+#--------------------------------------------------------------------------------
+circrnas = circRNA_seq[,c("circRNA_id", "length")]
+circrnas = left_join(circrnas,gene_mirna_circ %>% 
+                      group_by(CIRCRNA_ID) %>%
+                      summarise(mirna_binding = n_distinct(mature_mirna_id, 
+                                                           Binding_start,
+                                                           Binding_end)),
+            by=c("circRNA_id"="CIRCRNA_ID"))
+
+circrnas = circrnas[complete.cases(circrnas),]
+circrnas = circrnas[circrnas$mirna_binding !=0 ,]
+circrnas$logFC = circRNA_mtx[circrnas$circRNA_id,"logFC"]
+circrnas$PValue = circRNA_mtx[circrnas$circRNA_id,"PValue"]
+
+circrnas_mirna = left_join(circrnas,gene_mirna_circ, by=c("circRNA_id"="CIRCRNA_ID"))
+circrnas_mirna = circrnas_mirna[,c("circRNA_id","mature_mirna_id","Binding_start","Binding_end")]
+#--------------------------------------------------------------------------------
+#get_idEx = data.frame(idEx=1:length(exons_bsj), row.names=circRNA_seq$id)
+#head(get_idEx)
+
+#--------------------------------------------------------------------------------
+# SERVER
+#--------------------------------------------------------------------------------
+shinyServer(function(input, output, session){
+
+    rv=reactiveValues(
+            genes = genes,
+            mirnas = mirnas,
+            circrnas = circrnas,
+            circrnas_mirna = circrnas_mirna %>% select(mature_mirna_id,Binding_start,Binding_end) %>% distinct(),
+            select_circ = NULL,
+            filter = list()
+    )
+
+    genes_filt = reactive({
+        if (length(rv$filter)) {
+            id = sapply(rv$filter, "[[", 1)
+            type = sapply(rv$filter, "[[", 2)
+            filt_gene = id[type=="gene"]
+            filt_mirna = id[type=="mirna"]
+            filt_circ = id[type=="circ"]
+
+            filt_gene_mirna_gene = gene_mirna_circ
+
+            if (length(filt_mirna)) 
+                filt_gene_mirna_gene = filt_gene_mirna_gene %>% filter(mature_mirna_id %in% filt_mirna)
+            if (length(filt_circ)) 
+                filt_gene_mirna_gene = filt_gene_mirna_gene %>% filter(CIRCRNA_ID %in% filt_circ)
+
+            if (!(length(filt_mirna) || length(filt_circ))) {
+                G = NULL
+            } else {
+                G = genes[genes$target_symbol %in% (filt_gene_mirna_gene %>% select("target_symbol") %>% unique() %>% unlist()) , ]
+            }
+
+            if (length(filt_gene)) {
+                #G = G[!(G$target_symbol %in% filt_gene),]
+                G = data.frame(target_symbol=c(filt_gene, G$target_symbol) %>% unique())
+            } 
+
+        } else {
+            G = data.frame(matrix(ncol=1,nrow=0))
+            colnames(G) = c("target_symbol")
+        }
+        G[,1,drop=FALSE]
+    })
+
+    mirna_filt = reactive({
+        if (length(rv$filter)) {
+            id = sapply(rv$filter, "[[", 1)
+            type = sapply(rv$filter, "[[", 2)
+            filt_gene = id[type=="gene"]
+            filt_mirna = id[type=="mirna"]
+            filt_circ = id[type=="circ"]
+
+            filt_gene_mirna_gene = gene_mirna_circ
+
+            if (length(filt_circ)) 
+                filt_gene_mirna_gene = filt_gene_mirna_gene %>% filter(CIRCRNA_ID %in% filt_circ)
+            if (length(filt_gene)) 
+                filt_gene_mirna_gene = filt_gene_mirna_gene %>% filter(target_symbol %in% filt_gene)
+
+            if (!(length(filt_gene) || length(filt_circ))) {
+                mir = NULL
+            } else {
+                mir = mirnas[mirnas$mature_mirna_id %in% (filt_gene_mirna_gene %>% select("mature_mirna_id") %>% unique() %>% unlist()), ]
+            }
+
+            if (length(filt_mirna)) {
+                #mir = mir[!(mir$mature_mirna_id %in% filt_mirna), ]
+                mir = data.frame(mirna=c(filt_mirna, mir$mature_mirna_id) %>% unique())
+            } 
+        } else { 
+            mir = data.frame(matrix(ncol=1,nrow=0))
+            colnames(mir) = c("mature_mirna_id")
+        }
+        mir[,1,drop=FALSE]
+    })
+
+    circ_filt = reactive({
+        if (length(rv$filter)) {
+            id = sapply(rv$filter, "[[", 1)
+            type = sapply(rv$filter, "[[", 2)
+            filt_gene = id[type=="gene"]
+            filt_mirna = id[type=="mirna"]
+            filt_circ = id[type=="circ"]
+
+            filt_gene_mirna_gene = gene_mirna_circ
+
+            if (length(filt_mirna)) 
+                filt_gene_mirna_gene = filt_gene_mirna_gene %>% filter(mature_mirna_id %in% filt_mirna)
+            if (length(filt_gene)) 
+                filt_gene_mirna_gene = filt_gene_mirna_gene %>% filter(target_symbol %in% filt_gene)
+
+            if (!(length(filt_gene) || length(filt_mirna))) {
+                cir = NULL
+            } else {
+                cir = circrnas[circrnas$circRNA_id %in% (filt_gene_mirna_gene %>% select("circRNA_id") %>% unique() %>% unlist()), ]
+            }
+
+            if (length(filt_circ)) {
+                #cir = cir[!(cir$circRNA_id %in% filt_circ),]
+                cir = data.frame(circrna=c(filt_circ, cir$circRNA_id) %>% unique())
+            } 
+        } else {
+            cir = data.frame(matrix(ncol=1,nrow=0))
+            colnames(cir) = c("circRNA_id")
+        }
+        cir[,1,drop=FALSE]
+    })
+
+    gene_mirna_circ_filt = reactive({
+        id = sapply(rv$filter, "[[", 1)
+        type = sapply(rv$filter, "[[", 2)
+        filt_gene = id[type=="gene"]
+        filt_mirna = id[type=="mirna"]
+        filt_circ = id[type=="circ"]
+
+        filt_gene_mirna_gene = gene_mirna_circ
+
+        if (length(filt_gene)) 
+            filt_gene_mirna_gene = filt_gene_mirna_gene %>%
+                                   filter(target_symbol %in% filt_gene)
+        if (length(filt_mirna)) 
+            filt_gene_mirna_gene = filt_gene_mirna_gene %>% 
+                                   filter(mature_mirna_id %in% filt_mirna)
+        if (length(filt_circ)) 
+            filt_gene_mirna_gene = filt_gene_mirna_gene %>% 
+                                   filter(CIRCRNA_ID %in% filt_circ)
+        if (length(input$flt_type))
+            filt_gene_mirna_gene = filt_gene_mirna_gene %>% 
+                                   filter(type %in% input$flt_type)
+        if (length(input$flt_database))
+            filt_gene_mirna_gene = filt_gene_mirna_gene %>% 
+                                   filter(database %in% input$flt_database)
+#        if (length(input$flt_support_type))
+#            filt_gene_mirna_gene = filt_gene_mirna_gene %>% 
+#                                   filter(support_type %in% input$flt_support_type)
+        if (length(input$flt_site_type))
+            filt_gene_mirna_gene = filt_gene_mirna_gene %>% 
+                                   filter(Site_type %in% input$flt_site_type)
+        if (length(input$flt_category_H))
+            filt_gene_mirna_gene = filt_gene_mirna_gene %>% 
+                                   filter(category_H %in% input$flt_category_H)
+        #if (length(input$flt_logFC_min) && !is.na(as.numeric(input$flt_logFC_min))) 
+        #    filt_gene_mirna_gene = filt_gene_mirna_gene %>% 
+        #                           filter(logFC >= as.numeric(input$flt_logFC_min))
+
+        if (length(input$flt_logFC_max) && !is.na(as.numeric(input$flt_logFC_max))) 
+            filt_gene_mirna_gene = filt_gene_mirna_gene %>% 
+                                   filter(abs(logFC) >= as.numeric(input$flt_logFC_max))
+
+        #if (length(input$flt_pval_min) && !is.na(as.numeric(input$flt_pval_min))) 
+        #    filt_gene_mirna_gene = filt_gene_mirna_gene %>% filter(PValue >= as.numeric(input$flt_pval_min))
+
+        if (length(input$flt_pval_max) && !is.na(as.numeric(input$flt_pval_max))) 
+            filt_gene_mirna_gene = filt_gene_mirna_gene %>% 
+                                   filter(as.numeric(PValue) <= as.numeric(input$flt_pval_max))
+
+
+        filt_gene_mirna_gene[, !colnames(filt_gene_mirna_gene) %in% c("CIRCRNA_ID")]
+    })
+
+    all_tbl <- reactive({
+        datab <- gene_mirna_circ_filt()
+        datatable(datab[, -which(colnames(datab) == "circRNA_id")],
+                colnames=colnames_all_tbl,
+                escape = FALSE,
+                selection = "none",
+                rownames= FALSE,
+                options = list(lengthChange=FALSE)
+        ) %>% formatSignif(c('logFC'),3)
+    })
+
+    output$all_tbl <- DT::renderDataTable({
+        all_tbl()
+    })
+
+
+
+    output$gene_tbl <- DT::renderDataTable({
+#            datatable(rv$genes %>% arrange(PValue),
+            #datatable(rv$genes ,
+            datatable(genes ,
+                        colnames=c("symbol","logFC","P.value"),
+                        escape = FALSE,
+                        options = optionstable,
+                        rownames= FALSE,
+                        selection = list(mode = 'single', target = 'row')
+            )  %>% formatSignif(c('logFC'), 3)
+    })
+
+    output$mirna_tbl <- DT::renderDataTable({
+            datatable(data.frame(miRNA_id = mirnas$mature_mirna_id),
+            #datatable(mirna_filt(),
+                        colnames=c("miRNA"),
+                        escape = FALSE,
+                        options = optionstable,
+                        rownames= FALSE,
+                        selection = list(mode = 'single', target = 'row')
+            ) 
+    })
+
+    output$circ_tbl <- DT::renderDataTable({
+            datatable(circrnas,
+                        colnames=c("circRNA", "circRNA length (bp)", "number of\nmiRNA binding"),
+                        escape = FALSE,
+                        options = optionstable,
+                        rownames= FALSE,
+                        selection = list(mode = 'single', target = 'row')
+            ) 
+    })
+    #------------------------------------------------------------------------------
+    output$gene_tbl2 <- DT::renderDataTable({
+            datatable(genes_filt(),
+                        colnames=c("symbol"),
+                        escape = FALSE,
+                        options = list(lengthChange = FALSE, paging = FALSE,
+                                       language = list(zeroRecords = "No genes selected to filter.")),
+                        rownames= FALSE,
+                        selection = list(mode = 'multiple', target = 'row')
+            ) 
+
+    })
+
+    output$mirna_tbl2 <- DT::renderDataTable({
+            datatable(mirna_filt(),
+                        colnames=c("miRNA"),
+                        escape = FALSE,
+                        options = list(lengthChange = FALSE, paging = FALSE,
+                                       language = list(zeroRecords = "No miRNAs selected to filter.")),
+                        rownames= FALSE,
+                        selection = list(mode = 'multiple', target = 'row')
+            ) 
+    })
+
+    output$circ_tbl2 <- DT::renderDataTable({
+            datatable(circ_filt(),
+                        colnames=c("circRNA"),
+                        escape = FALSE,
+                        options = list(lengthChange = FALSE, paging = FALSE,
+                                       language = list(zeroRecords = "No circRNAs selected to filter.")),
+                        rownames= FALSE,
+                        selection = list(mode = 'multiple', target = 'row')
+            ) 
+    })
+
+    newFilt = observe({
+	    idx_gene  = input$gene_tbl_rows_selected
+	    idx_mirna = input$mirna_tbl_rows_selected
+	    idx_circ  = input$circ_tbl_rows_selected
+        id = sapply(rv$filter, "[[", 1)
+        type = sapply(rv$filter, "[[", 2)
+        if (!is.null(idx_gene) && !(genes$target_symbol[idx_gene] %in% id[type=="gene"])) {
+            isolate({
+                rv$filter[[length(rv$filter)+1]] <- c(genes$target_symbol[idx_gene], "gene")
+                #rv$genes <- rv$genes[-idx_gene,]
+            })
+        }
+        if (!is.null(idx_mirna) && !(mirnas$mature_mirna_id[idx_mirna] %in% id[type=="mirna"])) {
+            isolate({
+                rv$filter[[length(rv$filter)+1]] <- c(mirnas$mature_mirna_id[idx_mirna],"mirna")
+                #rv$mirnas <- rv$mirnas[-idx_mirna]
+            })
+        }
+        if (!is.null(idx_circ) && !(circrnas$circRNA_id[idx_circ] %in% id[type=="circ"])) {
+            isolate({
+                rv$filter[[length(rv$filter)+1]] <- c(circrnas$circRNA_id[idx_circ],"circ")
+                #rv$circrnas <- rv$circrnas[-idx_circ,]
+            })
+        }
+        selectRows(dataTableProxy("gene_tbl"), NULL)
+        selectRows(dataTableProxy("mirna_tbl"), NULL)
+        selectRows(dataTableProxy("circ_tbl"), NULL)
+    })
+
+   # newFilt = observe({
+   #     idx_gene  = input$gene_tbl2_rows_selected
+   #     idx_mirna = input$mirna_tbl2_rows_selected
+   #     idx_circ  = input$circ_tbl2_rows_selected
+   #     id = sapply(rv$filter, "[[", 1)
+   #     type = sapply(rv$filter, "[[", 2)
+   #     if (!is.null(idx_gene) && !(genes$target_symbol[idx_gene] %in% id[type=="gene"])) {
+   #         isolate({
+   #             rv$filter[[length(rv$filter)+1]] <- c(genes$target_symbol[idx_gene], "gene")
+   #             #rv$genes <- rv$genes[-idx_gene,]
+   #         })
+   #     }
+   #     if (!is.null(idx_mirna) && !(mirnas$mature_mirna_id[idx_mirna] %in% id[type=="mirna"])) {
+   #         isolate({
+   #             rv$filter[[length(rv$filter)+1]] <- c(mirnas$mature_mirna_id[idx_mirna],"mirna")
+   #             #rv$mirnas <- rv$mirnas[-idx_mirna]
+   #         })
+   #     }
+   #     if (!is.null(idx_circ) && !(circrnas$circRNA_id[idx_circ] %in% id[type=="circ"])) {
+   #         isolate({
+   #             rv$filter[[length(rv$filter)+1]] <- c(circrnas$circRNA_id[idx_circ],"circ")
+   #             #rv$circrnas <- rv$circrnas[-idx_circ,]
+   #         })
+   #     }
+   #     selectRows(dataTableProxy("gene_tbl"), NULL)
+   #     selectRows(dataTableProxy("mirna_tbl"), NULL)
+   #     selectRows(dataTableProxy("circ_tbl"), NULL)
+   # })
+
+    observe({
+        id = sapply(rv$filter, "[[", 1)
+        type = sapply(rv$filter, "[[", 2)
+        filt_gene = id[type=="gene"]
+        filt_mirna = id[type=="mirna"]
+        filt_circ = id[type=="circ"]
+        if (length(filt_gene)) {
+            i <- c(which(genes_filt()==filt_gene))
+            selectRows(dataTableProxy("gene_tbl2"), i)
+        }
+        if (length(filt_mirna)) {
+            i <- c(which(mirna_filt()==filt_mirna))
+            selectRows(dataTableProxy("mirna_tbl2"), i)
+        }
+        if (length(filt_circ)) {
+            i <- c(which(circ_filt()==filt_circ))
+            selectRows(dataTableProxy("circ_tbl2"), i)
+        }
+    })
+
+    observeEvent(input$removeFilter, {
+        isolate({
+            idx = strtoi(input$removeFilter)
+            val = rv$filter[idx][[1]]
+            #if (val[2] == "gene") {
+            #    rv$genes <- rbind(genes[genes$target_symbol==val[1],],rv$genes)
+            #}
+            #if (val[2] == "mirna"){
+            #    rv$mirnas <- c(val[1],rv$mirnas)
+            #}
+            #if (val[2] == "circ"){
+            #    rv$circrnas <- rbind(circrnas[circrnas$circRNA_id==val[1],],rv$circrnas)
+            #}
+            rv$filter <- rv$filter[-idx]
+            session$sendCustomMessage(type = "resetValue", message = "removeFilter")
+        })
+    })
+
+    filter_ouput = function(filter_type,type) {
+        html = "<div contenteditable='true'>"
+        if (length(filter_type)) {
+            i = 1
+            for (fil in filter_type) {
+                if (fil[2]==type) {
+                    html = paste0(html,"<div class='sel'>",fil[1],"<a id=",i," class='remove' onclick='removeFilter(this.id)'>x</a></div>")
+                }
+                i = i + 1
+            }
+        } else{
+           # cat("Select a gene/miRNA/circRNA to add it to the filter.")
+        }
+        html = paste0(html,"</div>")
+        div(HTML(html), style= "height: 120; overflow-y: scroll;li { display:inline; }; 
+            ul li:hover { background-color: #eee; }; border: 1px solid #cccccc; 
+            padding: 6px 12px; box-sizing: border-box;border-radius: 4px; width=100%") 
+    }
+
+    output$filters_gene = renderUI({
+        filter_ouput(rv$filter,"gene")
+    })
+    output$filters_mirna = renderUI({
+        filter_ouput(rv$filter,"mirna")
+    })
+    output$filters_circ = renderUI({
+        filter_ouput(rv$filter,"circ")
+    })
+
+    #--------------------------------------------------------------------------------
+    # FILTERS
+    #--------------------------------------------------------------------------------
+    # TYPE (miRNA)
+    output$flt_type <- renderUI({
+		selectizeInput("flt_type", label="Validation miRNA-Gene:", choices=levels(factor(gene_mirna_circ$type)),  multiple=TRUE,
+					   options=list(plugins=list("remove_button"), create=TRUE, persist=FALSE))
+	})
+    # database (miRNA)
+    output$flt_database <- renderUI({
+		selectizeInput("flt_database", label="Database miRNA-Gene:", choices=levels(factor(gene_mirna_circ$database)),  multiple=TRUE,
+					   options=list(plugins=list("remove_button"), create=TRUE, persist=FALSE))
+	})
+    # support_type 
+    #output$flt_support_type <- renderUI({
+	#	selectizeInput("flt_support_type", label="Support type:", choices=levels(factor(gene_mirna_circ$support_type)),  multiple=TRUE,
+	#				   options=list(plugins=list("remove_button"), create=TRUE, persist=FALSE))
+	#})
+    # site_type
+    output$flt_site_type <- renderUI({
+		selectizeInput("flt_site_type", label="Type of miRNA target site", choices=levels(factor(gene_mirna_circ$Site_type)),  multiple=TRUE,
+					   options=list(plugins=list("remove_button"), create=TRUE, persist=FALSE))
+	})
+    # category_H
+    output$flt_category_H <- renderUI({
+		selectizeInput("flt_category_H", label="Gene set:", choices=levels(factor(gene_mirna_circ$category_H)),  multiple=TRUE,
+					   options=list(plugins=list("remove_button"), create=TRUE, persist=FALSE))
+	})
+
+    # logFC
+    #output$flt_logFC_min <- renderUI({
+    #    textInput("flt_logFC_min", label="logFC min")
+	#})
+    # logFC
+    output$flt_logFC_max <- renderUI({
+        textInput("flt_logFC_max", label="logFC cutoff")
+	})
+
+    # Pvalue
+    #output$flt_pval_min <- renderUI({
+    #    textInput("flt_pval_min", label="PValue min")
+	#})
+    # PValue
+    output$flt_pval_max <- renderUI({
+        textInput("flt_pval_max", label="PValue cutoff")
+	})
+
+
+    #--------------------------------------------------------------------------------
+    # DOWNLOAD TABLE
+    #--------------------------------------------------------------------------------
+    # * CLIPBOARD
+    output$clip <- renderUI({
+        rclipButton("clipbtn", "Copy", "xx", icon("clipboard"))
+    })
+  
+    # Workaround for execution within RStudio version < 1.2
+    if (interactive()){
+        observeEvent(input$clipbtn,
+                     isolate({
+                         datab <- gene_mirna_circ_filt()
+                         clipr::write_clip(datab[,downlodable_all_tbl],
+                                           object_type = "table")
+                     }))
+    }
+
+    # * CSV
+    output$downloadCSV <- downloadHandler(
+        filename = function() {
+            paste("table_gene_mirna_circrna", ".csv", sep = "")
+        },
+        content = function(file) {
+            datab <- gene_mirna_circ_filt()
+            write.csv(datab[,downlodable_all_tbl], file,
+                      row.names=FALSE) 
+        }
+    )
+
+    # * XLSX
+    output$downloadXLSX <- downloadHandler(
+        filename = function() {
+            paste("table_gene_mirna_circrna", ".xlsx", sep = "")
+        },
+        content = function(file) {
+            datab <- gene_mirna_circ_filt()
+            write_xlsx(datab[,downlodable_all_tbl], file)
+        }
+    )
+
+    #--------------------------------------------------------------------------------
+    # SUMMARY
+    #--------------------------------------------------------------------------------
+    output$count_gene <- renderValueBox({
+        valueBox(
+          value = paste(nrow(genes),"genes post regulated"),
+          subtitle = "Number of genes post regulated",
+          icon = icon("dna"),
+          color= "light-blue"
+        )
+    })
+    output$count_mirna <- renderValueBox({
+        valueBox(
+          value = paste(nrow(mirnas),"miRNAs"),
+          subtitle = "Number of miRNAs binding to DE circRNAs",
+          icon = icon("align-left"),
+          color= "light-blue"
+        )
+    })
+    output$count_circ <- renderValueBox({
+        valueBox(
+          value = paste(nrow(circrnas),"circRNAs"),
+          subtitle = "Number of DE circRNAs",
+          icon = icon("circle-notch"),
+          color= "light-blue"
+        )
+    })
+
+    output$plot_sitetype <- renderPlot({
+        x = gene_mirna_circ_filt() %>% count(Site_type)
+        if (is.null(x) || nrow(x)==0) {
+            NULL
+        } else {
+            x %>% arrange(desc(n)) %>% mutate(prop = percent(n / sum(n))) -> x 
+
+            ggplot(x, aes(x = "", y = n, fill = fct_inorder(Site_type))) +
+                   geom_bar(width = 1, stat = "identity") +
+                   coord_polar("y", start = 0) +
+                   geom_label_repel(aes(label = prop), size=5, show.legend = F, nudge_x = 1) +
+                   guides(fill = guide_legend(title = "type of miRNA\ntarget sites")) + 
+                   theme_minimal()+
+                   theme(
+                       axis.text = element_blank(),
+                       axis.title.x = element_blank(),
+                       axis.title.y = element_blank(),
+                       panel.border = element_blank(),
+                       panel.grid=element_blank(),
+                       axis.ticks = element_blank(),
+                       plot.title=element_text(size=14, face="bold")
+                   ) 
+        }
+        #pie(x$n , labels = x$Site_type) + geom_text(aes(y = x$n), color = "black", size=6)
+    })
+
+
+    output$plot_hallmark <- renderPlot({
+        x = gene_mirna_circ_filt() %>% distinct(target_symbol,.keep_all=TRUE) %>% filter(!is.na(category_H)) %>%count(category_H)
+        ggplot(x, aes(x=category_H, y=n, fill=category_H)) +
+            geom_bar(stat="identity", alpha=.6, width=.4) +
+            coord_flip() +
+            xlab("") +
+            ylab("Number of genes post regulated") +
+            theme_bw() +
+            guides(fill = guide_legend(title = "Gene set"))
+   })
+
+    #--------------------------------------------------------------------------------
+    # CIRC_RNA
+    #--------------------------------------------------------------------------------
+    #observe({
+    #    query <- parseQueryString(session$clientData$url_search)
+    #    if(!is.null(query$url)) {
+    #      #url <- strsplit(query$url,"\"")[[1]][2]
+    #      #species <- strsplit(query$species, "\"")[[1]][2]
+    #    }
+    #})
+
+    #filt_mirna = observe({
+    #    idx_circ = input$all_circ_tbl_rows_selected
+    #    if (!is.null(idx_circ)) {
+    #        isolate({
+    #            rv$circrnas_mirna <- circrnas_mirna %>% 
+    #                  filter(circrnas$circRNA_id[idx_circ]==circRNA_id) %>%
+    #                  select(mature_mirna_id,Binding_start,Binding_end) %>% distinct()
+    #        })
+    #    }
+    #})
+
+    output$all_circ_tbl <- DT::renderDataTable({
+            datatable(circrnas,
+                        colnames=c("circRNA", "circRNA length (bp)", "number of\nmiRNA binding"),
+                        escape = FALSE,
+                        options = optionstable,
+                        rownames= FALSE,
+                        selection = list(mode = 'single', target = 'row', selected=c(1))
+            ) 
+    })
+    #output$circ_mirna_tbl <- DT::renderDataTable({
+    #        datatable(rv$circrnas_mirna,
+    #                    escape = FALSE,
+    #                    options = optionstable,
+    #                    rownames= FALSE,
+    #                    selection = list(mode = 'multiple', target = 'row' )
+    #        ) 
+    #})
+
+    observeEvent(input$changeTab, {
+        if (!is.null(input$changeTab)) {
+            isolate({
+                updateTabsetPanel(session, 'nav', "circRNA")
+                tmp <- input$changeTab
+                rv$select_circ <- tmp
+                session$sendCustomMessage(type = "resetValue", message = "changeTab")
+            })
+        }
+    })
+
+    observe({
+        bsj_id = rv$select_circ
+        if (!is.null(bsj_id)) {
+            #updateTabsetPanel(session, 'nav', "circRNA")
+            i <- c(which(circrnas$circRNA_id==bsj_id))
+            if (!length(input$all_circ_tbl_rows_selected)) {
+                isolate({
+                    session$sendCustomMessage(type = "refresh", message = bsj_id)
+                })
+            } else {
+                if (input$all_circ_tbl_rows_selected != i) {
+                    selectRows(dataTableProxy("all_circ_tbl"), i)
+                }
+            }
+            isolate({
+                rv$select_circ <- NULL
+            })
+        }
+    })
+
+    output$plot_circrna <- renderImage({
+        circ_id = circrnas$circRNA_id[input$all_circ_tbl_rows_selected]
+        outfile = "data/output.png"
+        if (!identical(circ_id, character(0))) {
+            selected_circ = circRNA_seq %>% filter(circRNA_id == circ_id)
+            # Extract sample name and stout_id of circ
+            preproc_stout_id = strsplit(selected_circ$stout_id, split=",")[[1]][1]
+            stout_id = strsplit(preproc_stout_id, split=":")[[1]][2]
+            sample = strsplit(selected_circ$samples, split=",")[[1]][1]
+            outfile = "data/output.png"
+            bitmap <- pdftools::pdf_render_page(file.path("data/CIRI-Full", sample, 
+                                                    "CIRI-vis_out", paste0(stout_id,".pdf")), 
+                                                page = 1, dpi = 300)
+            png::writePNG(bitmap, outfile)
+
+        } 
+        list(src = outfile, 
+             width = "70%",
+             alt = circ_id)
+    }, deleteFile=TRUE)
+
+    observeEvent(input$btn, {
+        # Show a simple modal
+        shinyalert(title = "", type = "info",closeOnClickOutside = T, 
+                   imageUrl = "img/ciri_vis.png", imageWidth = 600, 
+                   imageHeight=600, size="m",
+                   showCancelButton = FALSE,
+                   showConfirmButton = TRUE)
+      })
+
+    #--------------------------------------------------------------------------------
+    # OTHERS
+    #--------------------------------------------------------------------------------
+
+    #output$text_circSeq = renderUI({
+    #    #length is -50 since it is extended by 50 by circRNAprofiler
+    #    circ_seq = circRNA_seq$seq[circRNA_seq$id==input$CIRCRNA_ID]
+    #    div(
+    #    HTML(paste('<p><strong>circRNA id: </strong>',input$CIRCRNA_ID,'</p> 
+    #                <p><strong>Length predicted circRNA: </strong>',nchar(circ_seq)-50,'</p>
+    #                <p><pre   style=display: block;padding: 9.5px;margin: 0 0 10px;font-size: 14px;line-height: 1.42857143; color: #333;word-break: break-all;word-wrap: break-word;display: inline-block; background-color: rgb(255, 219, 248);border: 1px solid #ccc;border-radius: 4px;white-space: normal; >',
+    #                    circ_seq,'</pre></p>')),
+    #    cellArgs = list(style='white-space: normal;')
+    #    )
+    #})
+
+
+	# Loaded each time I refresh
+})
+
+# LOGFC
+#        x_ = genes$target_symbol
+#        y_ = genes$logFC
+#
+#        xtitle_ = "circRNA" 
+#        ytitle_ = "LogFC"
+#
+#        ggplot(data=genes[1:10,], aes(x=target_symbol, y=round(logFC,4), fill=logFC>0)) +
+#            geom_bar(stat="identity")+
+#            geom_text(aes(label=logFC), vjust=1.6, color="black", size=3.5)+
+#            theme_minimal()
+
+
