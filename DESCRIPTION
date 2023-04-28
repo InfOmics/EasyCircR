@@ -1,4 +1,4 @@
-Package: EasyCirc
+Package: EasyCircR
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
@@ -59,6 +59,8 @@ Imports:
     ggrepel,
     shinycssloaders,
     shinydashboard,
-    ggnet
+    ggnet,
+    Rbowtie,
+    Rhisat2
 Remotes: 
   github::briatte/ggnet
