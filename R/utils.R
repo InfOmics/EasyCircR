@@ -3,7 +3,7 @@
 #' @importFrom R.utils createLink
 .saveRDS_shiny <- function (X, file) {
     
-    dir.shiny.data <- system.file("app/data",package="EasyCirc")
+    dir.shiny.data <- system.file("app/data",package="EasyCircR")
     dir.create(dir.shiny.data, showWarnings = FALSE)
     linkpath <- file.path(dir.shiny.data, basename(file))
 
@@ -18,7 +18,7 @@
 #validate circRNA
 #' @importFrom bedr check.binary bedr
 .validate_circ <- function(circ){
-  reference <- system.file("data/CircReferenceDb_hg38.bed",package="EasyCirc")
+  reference <- system.file("data/CircReferenceDb_hg38.bed",package="EasyCircR")
   outdir <- "EasyCirc/circRNA/CIRI-Full"
   testcirc <- file.path(outdir, "ciri_results.bed")
   if(!file.exists(reference)){

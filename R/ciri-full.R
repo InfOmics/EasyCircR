@@ -82,7 +82,7 @@ run_ciri_full <- function(samples_file, genome_file, genome_annotation_file,
 
     dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
 
-    cirifull_jar <- system.file("java","CIRI-full.jar", package="EasyCirc")
+    cirifull_jar <- system.file("java","CIRI-full.jar", package="EasyCircR")
     command <- paste("java -jar", cirifull_jar, "Pipeline",
                      "-1", fq1, "-2", fq2, 
                      "-a", genome_annotation_file, "-r", genome_file, 
@@ -97,7 +97,7 @@ run_ciri_full <- function(samples_file, genome_file, genome_annotation_file,
     cat("\nCIRI-Vis: ", samplename, "\n")
     cat("--------------------------------------------------------------------------------")
 
-    cirivis_jar <- system.file("java","CIRI-vis.jar", package="EasyCirc")
+    cirivis_jar <- system.file("java","CIRI-vis.jar", package="EasyCircR")
     outdir <- file.path("EasyCirc/circRNA/CIRI-Full/", samplename, "CIRI-vis_out")
 
     if (force && dir.exists(outdir) ) {
@@ -138,7 +138,7 @@ run_ciri_full <- function(samples_file, genome_file, genome_annotation_file,
                && file.exists(fq2_unpaired) ) {
         cat("Already trimmed (use force=TRUE if you want to trim with different length) ... OK\n")
     } else {
-        trimmomatic_jar <- system.file("java","trimmomatic-0.39.jar", package="EasyCirc")
+        trimmomatic_jar <- system.file("java","trimmomatic-0.39.jar", package="EasyCircR")
 
         cutfilter = paste0("CROP:",trim_reads_length," MINLEN:",trim_reads_length)
 

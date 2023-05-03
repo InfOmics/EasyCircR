@@ -18,7 +18,7 @@ get_mirna_binding <- function(circ_df, force=FALSE) {
         quote = FALSE, row.names = FALSE, col.names = FALSE)
 
     # Create link for shiny app to access it
-    pathshiny <-file.path(system.file("app/data", package = "EasyCirc"), 
+    pathshiny <-file.path(system.file("app/data", package = "EasyCircR"), 
         filename)
     unlink(pathshiny)
     R.utils::createLink(pathshiny, file.path(outdir, filename), overwrite=TRUE)
@@ -29,8 +29,8 @@ get_mirna_binding <- function(circ_df, force=FALSE) {
 }
 
 .run_targetscan <- function(filename, outfile) {
-    targetscan <- system.file("exec", "targetscan_70.pl", package = "EasyCirc")
-    mirna_to_scan <- system.file("data", "miR.txt", package = "EasyCirc")
+    targetscan <- system.file("exec", "targetscan_70.pl", package = "EasyCircR")
+    mirna_to_scan <- system.file("data", "miR.txt", package = "EasyCircR")
     cmd <- paste("perl", targetscan, mirna_to_scan, filename, outfile)
     system(cmd)
 }

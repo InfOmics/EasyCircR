@@ -4,7 +4,7 @@ connect_circ_gene <- function (circMirnas=NULL, postGenes=NULL, tabletype="valid
                              only_significant_genes=TRUE, predicted.cutoff=35, force=FALSE) {
     outdir <- "EasyCirc/geneMirnaCirc"
     fileGeneMirnaCirc <- file.path(outdir, "geneMirnaCirc.rds")
-    mirna_family_path <- system.file("data", "miR_human.txt", package = "EasyCirc")
+    mirna_family_path <- system.file("data", "miR_human.txt", package = "EasyCircR")
     mirna_family <- read.csv(mirna_family_path, sep="\t")
     mirna_family <- mirna_family[,c("MiRBase.ID","miR.family")]
     category_extra <- "H"
