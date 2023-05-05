@@ -3,7 +3,7 @@
 run_ciri_full <- function(samples_file, genome_file, genome_annotation_file, 
                           percent_of_reads_after_trim=NULL, 
                           trim_reads_length=NULL, force=FALSE, 
-                          n_core=parallel::detectCores(), remove_temporary_files=FALSE) {
+                          n_core=parallel::detectCores(), remove_temporary_files=TRUE) {
     samples <- read_samplefile(samples_file)
 
     trimdir <- "EasyCirc/circRNA/trimmed_fastq"
