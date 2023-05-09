@@ -54,9 +54,9 @@ run_ciri_full <- function(samples_file, genome_file, genome_annotation_file,
                          force=force)
 
             # Clean CIRI-Full folders
-            if (remove_temporary_files) {
-                clean_easycirc_folder(samples_file)
-            }
+            #if (remove_temporary_files) {
+            #    clean_easycirc_folder(samples_file)
+            #}
         } else {
             cat(samplename, "has already a CIRI-Full output directory ... skipping\n")
         }
@@ -69,6 +69,10 @@ run_ciri_full <- function(samples_file, genome_file, genome_annotation_file,
 
         } else {
             cat(samplename, "has already a CIRI-vis_out directory ... skipping\n")
+        }
+        # Clean CIRI-Full folders
+        if (remove_temporary_files) {
+            clean_easycirc_folder(samples_file)
         }
 
     }
