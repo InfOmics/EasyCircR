@@ -159,10 +159,10 @@ body <- dashboardBody(
 
 shinyUI(
     dashboardPage(
-        dashboardHeader(title = "EasyCirc"),
+        dashboardHeader(title = "EasyCircR"),
         sidebar,
         body,
-        title = "EasyCirc"
+        title = "EasyCircR"
         #tags$style(type="text/css",
         #           ".shiny-output-error { visibility: hidden; }",
         #           ".shiny-output-error:before { visibility: hidden; }")
