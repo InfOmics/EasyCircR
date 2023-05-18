@@ -5,14 +5,16 @@ Table of Contents
 * [EasyCirc](#easycirc)
    * [Overview](#overview)
    * [Installation](#installation)
+      * [1. Installation via Docker](#1-inst-docker)
+      * [2. Installation via R](#2-inst-R)
    * [Testing dataset](#testing-dataset)
    * [Pipeline](#pipeline)
-      * [1. EISA](#1-eisa)
-      * [2. CIRI-Full](#2-ciri-full)
-      * [3. circRNA DE](#3-circrna-de)
-      * [4. miRNA binding](#4-mirna-binding)
-      * [5. Interaction between circRNAs and genes](#5-interaction-between-circrnas-and-genes)
-      * [6. Further analysis and Shiny](#6-further-analysis-and-shiny)
+      * [1. EISA](#3-eisa)
+      * [2. CIRI-Full](#4-ciri-full)
+      * [3. circRNA DE](#5-circrna-de)
+      * [4. miRNA binding](#6-mirna-binding)
+      * [5. Interaction between circRNAs and genes](#7-interaction-between-circrnas-and-genes)
+      * [6. Further analysis and Shiny](#8-further-analysis-and-shiny)
 
 <!-- Added by: runner, at: Fri Jun 11 08:39:18 UTC 2021 -->
 
