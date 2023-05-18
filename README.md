@@ -63,7 +63,12 @@ For OSX and Windows users is suggested to run CRISPRme via [Docker](https://www.
 
 
 ### 2. Installation via R
-The following Ubuntu packages need to be installed:
+The following packages need to be installed:
+- openjdk-11-jre-headless (JAVA)
+- bwa 
+- bedtools 
+
+Ubuntu users need to install: 
 - curl
 - libssl-dev
 - libfontconfig1-dev
@@ -76,7 +81,6 @@ The following Ubuntu packages need to be installed:
 - libpng-dev
 - libtiff-dev
 - libjpeg-dev
-- openjdk-11-jre-headless
 - libgit2-dev
 
 
