@@ -50,7 +50,7 @@ quantify post-transcriptional regulation of gene expression (EISA).
 
 ```R
 install.packages('devtools')
-devtools::install_github('lucaparmigiani/EasyCirc')
+devtools::install_github('InfOmics/EasyCircR')
 ```
 
 It also require bwa already installed to run CIRI-Full.
