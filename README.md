@@ -58,6 +58,12 @@ devtools::install_github('InfOmics/EasyCircR')
 
 It also require bwa already installed to run CIRI-Full.
 
+### 1. Installation via Docker
+asd
+
+### 2. Installation via R
+asd
+
 ## Testing dataset
 
 Fastq files to test the package can be download [here](blank).  
