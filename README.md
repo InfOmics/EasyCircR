@@ -59,7 +59,7 @@ devtools::install_github('InfOmics/EasyCircR')
 It also require bwa already installed to run CIRI-Full.
 
 ### 1. Installation via Docker
-For OSX and Windows users is suggested to run CRISPRme via [Docker](https://www.docker.com/get-started). Follow the following links to install Docker on [OSX](https://docs.docker.com/docker-for-mac/install/) or [Windows](https://docs.docker.com/docker-for-windows/install/), and follow the on-screen instructions.
+The package is also available inside a dedicated docker container. Follow the following links to install Docker on [Linux](https://docs.docker.com/desktop/install/linux-install/) or [Windows](https://docs.docker.com/docker-for-windows/install/), and follow the on-screen instructions.
 
 
 ### 2. Installation via R
