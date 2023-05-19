@@ -2,11 +2,11 @@ Table of Contents
 =================
 <!--ts-->
 * [Table of Contents](#table-of-contents)
-* [EasyCirc](#easycirc)
+* [EasyCircR](#easycircr)
    * [Overview](#overview)
    * [Installation](#installation)
-      * [1. Installation via Docker](#1-installation-via-docker)
-      * [2. Installation via R](#2-installation-via-R)
+      * [Installation from R](#installation-from-r)
+      * [Installation with Docker](#installation-with-docker)
    * [Testing dataset](#testing-dataset)
    * [Pipeline](#pipeline)
       * [1. EISA](#1-eisa)
@@ -20,13 +20,12 @@ Table of Contents
 
 <!--te-->
 
-# EasyCirc
+# EasyCircR
 
 ## Overview 
 
-EasyCirc combines the detection and reconstruction of circular RNAs (circRNAs) with the
-exon-intron split analysis (
-) by the means of miRNA response element (MREs)
+EasyCircR combines the detection and reconstruction of circular RNAs (circRNAs) with the
+exon-intron split analysis (EISA) by the means of miRNA response element (MREs)
 prediction.
 
 Starting from RNA-seq data, it uses CIRI-full for the reconstruction of
@@ -51,24 +50,22 @@ quantify post-transcriptional regulation of gene expression (EISA).
 
 ## Installation
 
-```R
-install.packages('devtools')
-devtools::install_github('InfOmics/EasyCircR')
-```
-
-It also require bwa already installed to run CIRI-Full.
-
-### 1. Installation via Docker
-The package is also available inside a dedicated docker container. Follow the following links to install Docker on [Linux](https://docs.docker.com/desktop/install/linux-install/) or [Windows](https://docs.docker.com/docker-for-windows/install/), and follow the on-screen instructions.
+We prodide two ways to download and install EasyCircR package:
+ 
+- Installation from R
+- Installation with Docker  
 
 
-### 2. Installation via R
-The following packages need to be installed:
+##  Installation from R
+
+the package relies on several dependencies of libraries and tools that must be installed before proceeding with package installation including:
+
+- R >= 
 - openjdk-11-jre-headless (JAVA)
 - bwa 
 - bedtools 
 
-Ubuntu users need to install: 
+Ubuntu users need to install also: 
 - curl
 - libssl-dev
 - libfontconfig1-dev
@@ -83,6 +80,28 @@ Ubuntu users need to install:
 - libjpeg-dev
 - libgit2-dev
 
+Once that all the dependencies are installed EasyCircR can be installed from github using  "devtools" package.
+
+```R
+# install devtools package
+install.packages('devtools')
+
+# install EasyCircR
+devtools::install_github('InfOmics/EasyCircR')
+```
+
+## Installation with Docker
+
+The package is also available inside a dedicated docker container. Follow the following links to install Docker on [Linux](https://docs.docker.com/desktop/install/linux-install/), [Windows](https://docs.docker.com/docker-for-windows/install/) or [macOS](https://docs.docker.com/desktop/install/mac-install/), and follow the on-screen instructions.
+
+
+To pull the EasyCircR docker image run the following command:
+
+```bash
+docker pull savesani/easycircr
+```
+
+An example on how to run EasyCircR analysis with docker is provided at the [Example of analysis with docker](#example-of-analysis-with-docker) section. 
 
 ## Testing dataset
 
@@ -337,7 +356,7 @@ save filtered results in csv/excel and the possibility to further investigate
 reconstructed circRNAs.
 
 ```R
-launch_shiny(shiny_host ="127.0.0.1", shiny_port = 7775)
+launch_shiny(shiny_host ="0.0.0.0", shiny_port = 3838)
 ```
 
 We can also show the circRNA structure directly from R without launching the
@@ -354,3 +373,34 @@ Finally we can plot the regulatory nerwork.
 ```R
 plot_regulatory_net("7:116092137|116112038:-:9")
 ```
+
+
+## Example of analysis with docker 
+
+We provide in the supplementary branch an R script called EasyCircR_example.R that could be downloaded modidified and executed inside the docker container. 
+
+
+```bash 
+wget https://github.com/InfOmics/stardust/raw/validation_data/stardustData/Datasets/MouseKidney/EasyCircR_example.R
+```
+
+Docker container can be used to run directly the script:
+
+```bash 
+# run container
+docker run --rm -p 9000:3838 -v /volume_dir:/volume_dir/ savesani/easycircr Rscript EasyCirc_test.R 
+
+```
+Or we can run the docker container in the interactive mode and execute each step of the analysis individually 
+
+
+```bash 
+# run container in the interactive mode
+docker run -ti --rm -p 9000:3838 -v /volume_dir:/volume_dir/ savesani/easycircr  
+```
+
+After that the analysis is completed, Shiny app can be run keeping the container active and open the following link in a browser page: http://0.0.0.0:9000
+
+
+
+
