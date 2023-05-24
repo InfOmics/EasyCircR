@@ -284,7 +284,7 @@ Than we run the DE analysis with the following:
 
 ```R
 circ_de <- de_circrna(circ_mtx, condition, design, contr, lfc=0, p.value=0.05,
-                      voomWithQualityWeights=FALSE, min_num_samples=2)
+                      voomWithQualityWeights=FALSE, min_num_samples=2, plotVoomResult=FALSE, ...)
 ```
 
 This function also perform filtering based on the parameter `min_num_samples`,
