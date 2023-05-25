@@ -131,7 +131,7 @@ store the final results in a folder `EasyCircR`, in the same directory of the co
 The final structure of `EasyCircR` is something similar to this:
 
 ```bash
-EasyCircR
+EasyCirc
 ├── circRNA
 │   ├── CIRI-Full
 │   │   ├── countMatrix.rds
