@@ -17,7 +17,7 @@ a \code{data.frame} storing associations between each circRNA and one or more mi
 }
 \description{
 Predict miRNA response elements (MREs) from the full sequence of circRNA using TargetScan.
-Check if \code(circ_mirna.txt) is stored in "EasyCirc/circRNA/miRNA" otherwise execute the step (see \code{force} parameter).
+Check if \code{circ_mirna.txt} is stored in "EasyCirc/circRNA/miRNA" otherwise execute the step (see \code{force} parameter).
 }
 \examples{
 # read CIRI output

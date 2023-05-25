@@ -10,7 +10,7 @@ plot_regulatory_net(bsj_id, gene_mirna_circ = NULL)
 \item{bsj_id}{the Back-Splice junction ID of the circRNA user wants to display.}
 
 \item{gene_mirna_circ}{the \code{data.frame} as results of \code{EasyCircR::connect_circ_gene(...)}.
-By default (\code{NULL}) the function check if the \code(geneMirnaCirc.rds) is stored in "EasyCirc/geneMirnaCirc",
+By default (\code{NULL}) the function check if the \code{geneMirnaCirc.rds} is stored in "EasyCirc/geneMirnaCirc",
 otherwise execute \code{EasyCircR::connect_circ_gene()}.}
 }
 \description{

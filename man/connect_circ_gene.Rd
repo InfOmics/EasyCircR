@@ -35,7 +35,7 @@ a \code{data.frame}  containing circRNA-miRNA-gene interaction and features.
 Join the predicted relations circRNA-miRNA with known/predicted miRNA-gene interactions.
 The miRNA-gene relation is downloaded using mulitMiR from predicted and validated miRNA–target
 interactions databases and/or from not validated ones.
-Check if \code(geneMirnaCirc.rds) is stored in "EasyCirc/geneMirnaCirc" otherwise execute the step (see \code{force} parameter).
+Check if \code{geneMirnaCirc.rds} is stored in "EasyCirc/geneMirnaCirc" otherwise execute the step (see \code{force} parameter).
 }
 \examples{
 gene_mirna_circ <- connect_circ_gene(circ_mirna, post_gene, only_significant_genes=TRUE, force=F, tabletype="validated")

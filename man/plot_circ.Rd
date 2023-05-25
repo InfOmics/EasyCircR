@@ -11,7 +11,7 @@ plot_circ(circ_df, bsj_id, samplename = NULL)
 
 \item{bsj_id}{the Back-Splice junction ID of the circRNA user wants to display.}
 
-\item{samplename}{the name of the sample (as reported in the \code(sample_file)) for which user wants to show the circRNA.}
+\item{samplename}{the name of the sample (as reported in the \code{sample_file}) for which user wants to show the circRNA.}
 }
 \description{
 Show circRNA results of CIRI-vis, which is part of the CIRI-Full algorithm.
