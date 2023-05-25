@@ -59,29 +59,3 @@ get_mirna_binding <- function(circ_df, force=FALSE) {
 #    }
 #  }
 #}
-
-#--------------------------------------------------------------------------------
-# TESTING
-#--------------------------------------------------------------------------------
-.testReadCIRIoutput <- function() {
-    #setwd('/home/luca/Work/IOR/work/EasyCirc/R')
-    #sampleFile <- system.file("extdata","samples_VL51.txt", package="EasyCirc")
-    sampleFile <- system.file("extdata","samples_TMD8_PQR.txt", package="EasyCirc")
-    genomeFile <- "/home/luca/Data/Bio/ensmbl/hg38.fa"
-    genomeAnnotation <- "/home/luca/Data/Bio/ensmbl/hg38.gtf"
-    trimReadsLength <- 130
-    trimReads(sampleFile, trimReadsLength)
-    run_ciri_full(sampleFile, genomeFile, genomeAnnotation)
-    #--------------------------------------------------------------------------------
-
-    circ <- read_ciri_output(sampleFile)
-    names(circ)
-    circ_df <- circ$circ_df 
-    circ_mtx <- circ$circ_mtx
-    head(circ_df)
-    head(circ_mtx)
-    nrow(circ_mtx)
-    nrow(circ_df)
-    head(circ)
-    mirna <- get_mirna_binding(circ, force=T)
-}
