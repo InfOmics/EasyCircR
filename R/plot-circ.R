@@ -1,3 +1,26 @@
+#' @title EasyCircR - plot circRNA structure
+#' 
+#' @description Show circRNA results of CIRI-vis, which is part of the CIRI-Full algorithm. 
+#' The function returns a plot without launching the shiny app and checks if there are some possible 
+#' isoforms for the same circRNA (Back-Splice junction ID, \code{bsj_id}.)
+#' If multiple samples have the same \code{bsj_id}, the function plots the first sample in the \code{sample_file}.
+#'  
+#' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
+#' 
+#' @param circ_df the \code{data.frame} containing circRNAs features as results of \code{EasyCircR::read_ciri_output()}.
+#'
+#' @param bsj_id the Back-Splice junction ID of the circRNA user wants to display.
+#' @param samplename the name of the sample (as reported in the \code(sample_file)) for which user wants to show the circRNA.
+#' 
+#' @examples 
+#' circ <- read_ciri_output(sampleFile)
+#' circ_df <- circ$circ_df 
+#' circ_mtx <- circ$circ_mtx
+#' 
+#' bsj_id = "1:117402186|117405645:+:2"
+#' plot_circ(circ_df, bsj_id)
+#' plot_circ(circ_df, bsj_id, "TMD8_DMSO_8h")
+#'
 #' @importFrom Biobase openPDF
 #' @export
 plot_circ = function (circ_df, bsj_id, samplename=NULL) {
