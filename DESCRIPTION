@@ -1,15 +1,13 @@
 Package: EasyCircR
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+Title:  EasyCircR: Detection and reconstruction of circular RNAs post-transcriptional regulatory interaction networks
+Version: 1.0
+Authors@R: Antonino Aparo, Simone Avesani, Luca Parmigiani, Sara Napoli, Francesco Bertoni, Vincenzo Bonnici, Luciano Cascione, Rosalba Giugno.
+Description:  EasyCircR is a novel R package that combines circRNA detection and reconstruction with posttranscriptional gene expression 
+            analysis (exon-intron split analysis) and miRNA response element prediction.
+            The package enables estimation and visualization of circRNA-miRNA-mRNA interactions through an intuitive
+            Shiny application, taking advantage of the post-transcriptional regulatory nature of circRNAs and excluding
+            unrealistic regulatory outcomes.
+License: MIT
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
