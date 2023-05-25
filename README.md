@@ -43,7 +43,7 @@ quantify post-transcriptional regulation of gene expression (EISA).
 3. Differentially expressed analysis of detected circRNAs (with limma).
 4. Predict MREs from the full sequence of circRNA using TargetScan.
 5. Finally, connecting circRNA to genes.
-6. Further analysis and visualization with shiny app.
+6. Further analysis and visualization with Shiny app.
 
 ## Installation
 
@@ -333,7 +333,7 @@ first step of eisa we filtered `post_gene` by `FDR`.
 
 ### 6. Further analysis and Shiny  
 
-EasyCirc provides a shiny app to visualize the connection between
+EasyCirc provides a Shiny app to visualize the connection between
 circRNA-miRNA-gene. The app includes multiple types of filter, the ability to
 save filtered results in csv/excel and the possibility to further investigate
 reconstructed circRNAs.
@@ -343,7 +343,7 @@ launch_shiny(shiny_host ="0.0.0.0", shiny_port = 3838)
 ```
 
 We can also show the circRNA structure directly from R without launching the
-shiny app using `plot_circ`
+Shiny app using `plot_circ`
 
 ```R
 plot_circ(circ_df,"12:116230533|116237705:-:13")
