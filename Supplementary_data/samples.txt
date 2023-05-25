@@ -1,7 +1,0 @@
-FileName1	FileName2	SampleName
-fastq/S1_DMSO_4h_R1.fq.gz	fastq/S1_DMSO_4h_R2.fq.gz	S1_DMSO_4h
-fastq/S2_PQR_4h_R1.fq.gz	fastq/S2_PQR_4h_R2.fq.gz	S2_PQR_4h
-fastq/S3_DMSO_8h_R1.fq.gz	fastq/S3_DMSO_8h_R2.fq.gz	S3_DMSO_8h
-fastq/S4_PQR_8h_R1.fq.gz	fastq/S4_PQR_8h_R2.fq.gz	S4_PQR_8h
-fastq/S5_DMSO_12h_R1.fq.gz	fastq/S5_DMSO_12h_R2.fq.gz	S5_DMSO_12h
-fastq/S6_PQR_12h_R1.fq.gz	fastq/S6_PQR_12h_R2.fq.gz	S6_PQR_12h
