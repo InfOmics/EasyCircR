@@ -1,4 +1,4 @@
-@title EasyCircR - DE circRNAs
+#' @title EasyCircR - DE circRNAs
 #'
 #' @description Differential expressed analysis of detected circRNAs performed with \code{limma} package.
 #' 
