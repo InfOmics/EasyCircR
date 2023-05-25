@@ -23,6 +23,30 @@
 
     return(reads_length)
 }
+
+#' @title EasyCircR - plot reads lenght
+#' 
+#' @description Return the length of the reads. 
+#' In order to preserve the highest number of reads,
+#' EasyCircR provides a visualization function that allows exploring the distribution of read lengths before trimming.
+#' It returns a histogram where the blue dotted line represents at which length 
+#' cutting the reads will result in keeping 80% (as default) of all the original reads.
+#' If the reads have already the same length the function returns the length of the reads.
+#' 
+#' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
+#' 
+#' @param samples_file path to tab separated file with three named columns indicating:
+#' two pair-end fastq files and sample name.  Column names are FileName1,
+#' FileName2 and SampleName.
+#'
+#' @param threshold_read_length \code{numeric}, threshold of the blue dotted line. Default is \code{0.8} (80%) 
+#' @param fast \code{logical}, if \code{TRUE} read only the first sample. Default is \code{TRUE}
+#' 
+#' @examples 
+#' samples_file <- "samples.txt"
+#' 
+#' plot_readlen_hist(samples_file)
+#'
 #' @importFrom R.utils decompressFile
 #' @import ggplot2
 #' @export
