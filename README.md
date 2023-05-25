@@ -41,8 +41,7 @@ The pipeline is divided in 6 major steps.
 quantify post-transcriptional regulation of gene expression (EISA).
 2. Reconstruct and quantify full-length circRNAs with CIRI-Full.
 3. Differentially expressed analysis of detected circRNAs (with limma).
-4. Predict MREs from the full sequence of circRNA (TargetScan, miRanda,
-   RNA-hybrid).
+4. Predict MREs from the full sequence of circRNA using TargetScan.
 5. Finally, connecting circRNA to genes.
 6. Further analysis and visualization with shiny app.
 
