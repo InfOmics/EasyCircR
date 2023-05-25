@@ -1,3 +1,27 @@
+#' @title EasyCircR -  connect circRNA to genes.
+#'
+#' @description Join the predicted relations circRNA-miRNA with known/predicted miRNA-gene interactions.
+#' The miRNA-gene relation is downloaded using mulitMiR from predicted and validated miRNA–target 
+#' interactions databases and/or from not validated ones.
+#' Check if \code(geneMirnaCirc.rds) is stored in "EasyCirc/geneMirnaCirc" otherwise execute the step (see \code{force} parameter).
+#' 
+#' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
+#' 
+#' @param circMirnas the \code{data.frame} containing circRNA-miRNA interactions as results of \code{EasyCircR::get_mirna_binding(...)}
+#'
+#' @param postGenes the \code{data.frame} containing post-transcriptional regulated genes as results of \code{EasyCircR::get_postregulated_gene(...)}.
+#' @param tabletype can be set to \code{validated} to retrieve only validated miRNA-gene interactions or \code{all} to retrieve all the potential interactions.
+#' @param only_significant_genes \code{logical(1)}, if \code{TRUE} targeting the post-transcriptionally regulated genes 
+#' with adjusted fdr p-value < 0.1
+#' @param predicted.cutoff an integer giving a prediction score cutoff. Default is \code{35} 
+#' @param force \code{logical(1)}. If \code{FALSE} the tool will search for the already stored RDS output files, if
+#' there are none it will generate them. If \code{TRUE} it will force the redo of all the steps of the function
+#' 
+#' @return a \code{data.frame}  containing circRNA-miRNA-gene interaction and features.
+#' 
+#' @examples 
+#' gene_mirna_circ <- connect_circ_gene(circ_mirna, post_gene, only_significant_genes=TRUE, force=F, tabletype="validated")
+#' 
 #' @importFrom multiMiR multimir_dbInfoVersions multimir_switchDBVersion get_multimir
 #' @export
 connect_circ_gene <- function (circMirnas=NULL, postGenes=NULL, tabletype="validated", 
