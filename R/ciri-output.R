@@ -1,6 +1,7 @@
 #' @title EasyCircR - read CIRI-full output
 #'
 #' @description Read CIRI-full output starting from the count matrix and description file stored in the "EasyCirc/circRNA/CIRI-full" directory.
+#' Additionally, map significant differentially expressed circRNAs to their host gene annotation supplied by the circBank database.
 #'
 #' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
 #' 
@@ -12,7 +13,7 @@
 #' 
 #' @return a \code{list} with two elements: \describe{
 #'   \item{circ_df}{a \code{dataframe} containing information like the chromosome, the start and end of the back-spliced junction (BSJ),
-#'   the length of the reconstructed circRNA and the reconstructed sequence.}
+#'   the length of the reconstructed circRNA, the reconstructed sequence and the circBank annotation.}
 #'   \item{circ_mtx}{is the count matrix of circRNAs.}}
 #'   
 #' @examples 
