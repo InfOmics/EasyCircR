@@ -10,8 +10,6 @@
 #' By default (\code{NULL}) the function check if the \code(geneMirnaCirc.rds) is stored in "EasyCirc/geneMirnaCirc",
 #' otherwise execute \code{EasyCircR::connect_circ_gene()}.
 #' 
-#' @return 
-#' 
 #' @examples 
 #' plot_regulatory_net("12:116230533|116237705:-:13")
 #'
