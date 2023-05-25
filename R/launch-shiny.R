@@ -1,4 +1,19 @@
-#' @importFrom shiny runApp
+#' @title EasyCircR - launch Shiny app
+#'
+#' @description Launch the Shiny app to visualize the connection between circRNA-miRNA-gene.
+#' The app includes multiple types of filters, the ability to save filtered results in csv/excel and the 
+#' possibility to further investigate reconstructed circRNAs.
+#' 
+#' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
+#'
+#' @param shiny_host the IPv4 address that the application should listen on. Defaults is "0.0.0.0".
+#'
+#' @param shiny_port the TCP port that the application should listen on. Defaults is \code{3838}.
+#'
+#' @examples 
+#' launch_shiny(shiny_host ="0.0.0.0", shiny_port = 3838)
+#' 
+#' @importFrom shiny runApp 
 #' @export
 launch_shiny <- function(shiny_host ="0.0.0.0",shiny_port = 3838) {
     .update_shiny_symlinks()
