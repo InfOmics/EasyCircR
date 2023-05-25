@@ -1,3 +1,36 @@
+#' @title EasyCircR - miRNA response element prediction
+#'
+#' @description Predict miRNA response elements (MREs) from the full sequence of circRNA using TargetScan. 
+#' Check if \code(circ_mirna.txt) is stored in "EasyCirc/circRNA/miRNA" otherwise execute the step (see \code{force} parameter).
+#'
+#' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
+#' 
+#' @param circ_df the \code{data.frame} containing circRNAs features as results of \code{EasyCircR::read_ciri_output()}.
+#'
+#' @param force \code{logical(1)}. If \code{FALSE} the tool will search for the already stored RDS output files, if
+#' there are none it will generate them. If \code{TRUE} it will force the redo of all the steps of the function.
+#' 
+#' @return  a \code{data.frame} storing associations between each circRNA and one or more miRNA families.
+#' 
+#' @examples 
+#' # read CIRI output
+#' circ <- read_ciri_output(samples_file)
+#' names(circ)
+#  [1] "circ_df"  "circ_mtx"
+#' circ_df <- circ$circ_df
+#' circ_mtx <- circ$circ_mtx
+#' 
+#' # identify DE circRNAs
+#' design <- model.matrix(...) #define your model 
+#' contr <- limma::makeContrasts(...) #define your contrasts 
+#' circ_de <- de_circrna(...) #define your parameters 
+#' 
+#' #Select only DE circRNAs
+#' circ_df_de <- circ_df[circ_df$bsj_id %in% rownames(circ_de), ]
+#' 
+#' 
+#' circ_mirna <- get_mirna_binding(circ_df_de, force=FALSE)
+#'
 #' @importFrom R.utils createLink
 #' @export
 get_mirna_binding <- function(circ_df, force=FALSE) {
