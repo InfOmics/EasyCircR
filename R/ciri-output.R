@@ -1,7 +1,7 @@
 #' @title EasyCircR - read CIRI-full output
 #'
 #' @description Read CIRI-full output starting from the count matrix and description file stored in the "EasyCirc/circRNA/CIRI-full" directory.
-#' Additionally, map significant differentially expressed circRNAs to their host gene annotation supplied by the circBank database.
+#' Additionally, the function maps significant differentially expressed circRNAs to their host gene annotation supplied by the circBank database.
 #'
 #' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
 #' 
