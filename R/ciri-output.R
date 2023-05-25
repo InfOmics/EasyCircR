@@ -1,6 +1,6 @@
 #' @title EasyCircR - read CIRI-full output
 #'
-#' @description read CIRI-full output starting from the count matrix and description file stored in the "EasyCirc/circRNA/CIRI-full" directory.
+#' @description Read CIRI-full output starting from the count matrix and description file stored in the "EasyCirc/circRNA/CIRI-full" directory.
 #'
 #' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
 #' 
