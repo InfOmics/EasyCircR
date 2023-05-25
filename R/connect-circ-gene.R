@@ -1,3 +1,27 @@
+#' @title EasyCircR -  connect circRNA to genes.
+#'
+#' @description Join the predicted relations circRNA-miRNA with known/predicted miRNA-gene interactions.
+#' The miRNA-gene relation is downloaded using mulitMiR from predicted and validated miRNA–target 
+#' interactions databases and/or from not validated ones.
+#' Check if \code(geneMirnaCirc.rds) is stored in "EasyCirc/geneMirnaCirc" otherwise execute the step (see \code{force} parameter).
+#' 
+#' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
+#' 
+#' @param circMirnas the \code{data.frame} containing circRNA-miRNA interactions as results of \code{EasyCircR::get_mirna_binding(...)}
+#'
+#' @param postGenes the \code{data.frame} containing post-transcriptional regulated genes as results of \code{EasyCircR::get_postregulated_gene(...)}.
+#' @param tabletype can be set to \code{validated} to retrieve only validated miRNA-gene interactions or \code{all} to retrieve all the potential interactions.
+#' @param only_significant_genes \code{logical(1)}, if \code{TRUE} targeting the post-transcriptionally regulated genes 
+#' with adjusted fdr p-value < 0.1
+#' @param predicted.cutoff an integer giving a prediction score cutoff. Default is \code{35} 
+#' @param force \code{logical(1)}. If \code{FALSE} the tool will search for the already stored RDS output files, if
+#' there are none it will generate them. If \code{TRUE} it will force the redo of all the steps of the function
+#' 
+#' @return a \code{data.frame}  containing circRNA-miRNA-gene interaction and features.
+#' 
+#' @examples 
+#' gene_mirna_circ <- connect_circ_gene(circ_mirna, post_gene, only_significant_genes=TRUE, force=F, tabletype="validated")
+#' 
 #' @importFrom multiMiR multimir_dbInfoVersions multimir_switchDBVersion get_multimir
 #' @export
 connect_circ_gene <- function (circMirnas=NULL, postGenes=NULL, tabletype="validated", 
@@ -101,63 +125,3 @@ connect_circ_gene <- function (circMirnas=NULL, postGenes=NULL, tabletype="valid
 
     return(gene_mirna_circ[,returncolumns])
 }
-
-#--------------------------------------------------------------------------------
-# TESTING
-#--------------------------------------------------------------------------------
-.test_circ_mirna_gene <- function () {
-    # Post regulated genes
-    #sampleFile <- system.file("extdata","samples_VL51.txt", package="EasyCirc")
-    sampleFile <- system.file("extdata","samples_TMD8_PQR.txt", package="EasyCirc")
-    genomeFile <- "/home/luca/Data/Bio/ensmbl/hg38.fa"
-    genomeAnnotation <- "/home/luca/Data/Bio/ensmbl/hg38.gtf"
-    #condition <- factor(c("ES", "ES", "TN", "TN"))
-    condition <- factor(rep(c("DMSO", "PQR"),3))
-    aligner <- "Rhisat2"#"Rbowtie"
-
-
-    postGenes <- get_postregulated_gene(sampleFile, genomeFile, condition, genomeAnnotation, 
-                                        aligner=aligner, force=FALSE)
-
-
-    head(postGenes)
-    nrow(postGenes)
-    nrow(postGenes[postGenes$PValue <= 0.05 & abs(postGenes$logFC) >= 1,])
-
-    #--------------------------------------------------------------------------------
-    # circRNA
-    #---------------------------------------------------------------------------------
-    #trimReadsLength <- 130
-    #trimReads(sampleFile, trimReadsLength)
-    #run_ciri_full(sampleFile, genomeFile, genomeAnnotation)
-    circ <- read_ciri_output(sampleFile)
-    names(circ)
-    circ_df <- circ$circ_df 
-    circ_mtx <- circ$circ_mtx
-    #--------------------------------------------------------------------------------
-    # DE circRNA 
-    #--------------------------------------------------------------------------------
-    design <- model.matrix(~0+condition)
-    contr <- limma::makeContrasts("PQRvsDMSO"  = conditionPQR - conditionDMSO, levels = colnames(design))
-    circ_de <- de_circrna(circ_mtx, condition, design, contr, lfc=1)
-    nrow(circ_de)
-    head(circ_de)
-    circ_mtx[rownames(circ_de),]
-    circ_df_de <- circ_df[circ_df$bsj_id %in% rownames(circ_de), ]
-    circ_df_de
-
-    #--------------------------------------------------------------------------------
-    # miRNA binding
-    #---------------------------------------------------------------------------------
-    circMirnas <- get_mirna_binding(circ_df_de, force=FALSE)
-    head(circMirnas[,c(1,2)])
-    nrow(circMirnas)
-
-    #--------------------------------------------------------------------------------
-    # gene_mirna_circ
-    #---------------------------------------------------------------------------------
-    gene_mirna_circ <- connect_circ_gene(circMirnas, postGenes, only_significant_genes=TRUE)
-    head(gene_mirna_circ)
-    nrow(gene_mirna_circ)
-}
-
