@@ -1,20 +1,42 @@
+#' @title EasyCircR - Quantify post-transcriptional regulation of gene expression
+#'
+#' @description  Measure changes across different experimental conditions to quantify post-transcriptional regulation of gene expression (EISA).
+#'  
+#' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
+#' 
 #' @param samples_file path to tab separated file with three named columns indicating:
 #' two pair-end fastq files and sample name.  Column names are FileName1,
-#' FileName2 and SampleName.  
+#' FileName2 and SampleName. A number of samples greater than 2 is required for each condition.  
 #' @param genome_file path to genome file.
 #' @param genome_annotation_file path to annotation file.
 #' @param condition \code{numeric}, \code{character} or \code{factor} with two levels
-#'   that groups the samples (columns of \code{cntEx} and \code{cntIn}) into two
-#'   conditions. The contrast will be defined as secondLevel - firstLevel.
-#' @param outdir 
-#' @param aligner selects the aligner program to be used for aligning the reads for the eisa step. Currently, only “Rbowtie” and “Rhisat2” (default) are supported.
-#' @param force \code{logical(1)}. If \code{FALSE} it will search for the already stored RDS output files, if
-#' there are none it will generate them. If \code{TRUE} it will force the redo of all 
-#' the steps of the pipeline.
-#' @param stranded_data logical(1). If TRUE, the RNA-seq data is assumed to be strand-specific, and therefore only overlapping genes that are on the same strand will be filtered out during the eisa step. If FALSE, also genes overlapping on opposite strands will be filtered out.
-#' @param n_core number of core to be used. Default is 1.
-#' @param cacheDir 
-#'
+#'   that groups the samples into two conditions. The contrast will be defined as secondLevel - firstLevel.
+#' @param outdir path to the output directory 'EasyCirc' that store the final results. The three major folders ("circRNA", 
+#' "geneMirnaCirc", "postGene") contain each one or two `.rds` file storing the results of the pipeline, 
+#' e.g. `postGene.rds` the results of `get_postregulated_gene` or `countMatrix.rds` contains the counts of circRNA found.
+#' @param aligner selects the aligner program to be used for aligning the reads for the EISA step. Currently, only "Rbowtie" and 
+#' "Rhisat2" (default) are supported.
+#' @param force \code{logical(1)}. If \code{FALSE} the tool will search for the already stored RDS output files, if
+#' there are none it will generate them. If \code{TRUE} it will force the redo of all the steps of the function.
+#' @param stranded_data \code{logical(1)}. If \code{TRUE}, the RNA-seq data is assumed to be strand-specific, and therefore only overlapping genes that are on the same strand will be filtered out during the EISA analysis If \code{FALSE}, also genes overlapping on opposite strands will be filtered out.
+#' @param n_core number of cores to be used. Default is \code{1}.
+#' @param cacheDir specifies the location to store (potentially huge) aligner temporary files . If set to \code{NULL} (default), the temporary directory of the current R session as returned by \code{tempdir()} will be used.
+#' 
+#' @return a \code{data.frame} with elements that stores statisical results for differential changes 
+#' between exonic and intronic contrast, an indication for post-transcriptional regulation.
+#' 
+#' @examples
+#' samples_file <- "samples.txt"
+#' genome_file <- "genome/hg38.fa"
+#' genome_annotation_file <- "genome/hg38.gtf"
+#' condition <- factor(rep(c("DMSO","PQR"),2))
+#' 
+#' post_gene <- get_postregulated_gene(samples_file, genome_file, genome_annotation_file, 
+#'                                    condition, aligner="Rbowtie",
+#'                                    force=FALSE, n_core=10)
+#'                                    
+#' post_gene <- post_gene[post_gene$FDR <= 0.1,] 
+#'                                                                        
 #' @importFrom GenomicFeatures makeTxDbFromGFF
 #' @importFrom eisaR getRegionsFromTxDb runEISA
 #' @importFrom parallel makeCluster
@@ -75,25 +97,4 @@ get_postregulated_gene = function (samples_file, genome_file, genome_annotation_
     extra_info <- extra_info %>% dplyr::select(gs_name, gene_symbol) %>% as.data.frame()
     colnames(extra_info) <- c(paste0("category_",category), "target_symbol")
     return(dplyr::left_join(gene_mirna_circ, extra_info, by="target_symbol"))
-}
-
-#--------------------------------------------------------------------------------
-# TESTING
-#--------------------------------------------------------------------------------
-
-.testGENE <- function () {
-    samples_file <- system.file("extdata","samples_rna_paired.txt", package="EasyCirc")
-    genome_file <- "/home/luca/Data/Bio/ensmbl/hg38.fa"
-    genome_annotation_file <- "/home/luca/Data/Bio/ensmbl/hg38.gtf"
-    # create condition factor (contrast will be TN - ES)
-    condition <- factor(c("ES", "ES", "TN", "TN"))
-    levels(condition)
-    aligner <- "Rhisat2" #or Rbowtie
-
-    post_gene <- get_postregulated_gene(samples_file, genome_file, condition, genome_annotation_file, aligner=aligner, force=TRUE)
-    head(post_gene)
-    nrow(post_gene)
-    outdir='.'
-    stranded_data=TRUE
-    force=TRUE
 }
