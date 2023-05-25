@@ -1,3 +1,40 @@
+#' @title EasyCircR - detection of circRNAs
+#'
+#' @description  Reconstruction and quantification full-length circRNAs with CIRI-full.
+#'  
+#' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
+#' 
+#' @param samples_file path to tab separated file with three named columns indicating:
+#' two pair-end fastq files and sample name.  Column names are FileName1,
+#' FileName2 and SampleName. A number of samples greater than 2 is required for each condition.  
+#' @param genome_file path to genome file.
+#' @param genome_annotation_file path to annotation file.
+#' @param trim_reads_length \code{numeric}, define at which length reads must be cutted. 
+#' Reads smaller than that size are discarded and longer are trimmed. 
+#' CIRI-full cannot process sequencing reads with different lengths.
+#' Trimming results are stored in "EasyCirc/circRNA/trimmed_fastq" directory.
+#' @param force \code{logical(1)}. If \code{FALSE} the tool will search for the already stored RDS output files, if
+#' there are none it will generate them. If \code{TRUE} it will force the redo of all the steps of the function.
+#' @param n_core \code{numeric}, the number of CPU cores to use. If not specified, EasyCircR 
+#' tries to detect the number of CPU cores on the current host using the function \code{parallel:detectCores()}.
+#' @param remove_temporary_files \code{logical}, if \code{TRUE} temporary files will be removed at the end of each sample circRNA detection step.
+#' EasyCircR requires a significant amount of disk memory, it is recommended to leave the default value \code{TRUE}
+#'
+#' @return the function generates an output directory called "CIRI-Full" in which are stored all the CIRI-full analysis 
+#' results including \describe{
+#' \item{countMatrix.rds}{count matrix of circRNAs}
+#' \item{predictedCircRNAs.rds}{contains information like the chromosome, the start and end of the back-spliced junction (BSJ),
+#'   the length of the reconstructed circRNA and the reconstructed sequence.}
+#' \item{sample directory}{a directory for each sample where all the temporary and final CIRI-full results are stored.}
+#' }
+#' 
+#' @examples 
+#' samples_file <- "samples.txt"
+#' genome_file <- "genome/hg38.fa"
+#' genome_annotation_file <- "genome/hg38.gtf"
+#' run_ciri_full(samples_file, genome_file, genome_annotation_file, 
+#'               force=FALSE, trim_reads_length=130, n_core= 10)
+#'               
 #' @importFrom parallel detectCores
 #' @export
 run_ciri_full <- function(samples_file, genome_file, genome_annotation_file, 
@@ -188,18 +225,4 @@ clean_easycirc_folder = function (samples_file) {
             unlink(file.path(path_sample, ciri_folder), recursive=TRUE)
         }
     }
-}
-
-#--------------------------------------------------------------------------------
-# Testing CIRI-FULL
-#--------------------------------------------------------------------------------
-.testCIRIFull <- function() {
-    #setwd('/home/luca/Work/IOR/work/EasyCirc/R')
-    #samples_file <- system.file("extdata","samples_VL51.txt", package="EasyCirc")
-    samples_file <- system.file("extdata","samples_TMD8_PQR.txt", package="EasyCirc")
-    genome_file <- "/home/luca/Data/Bio/ensmbl/hg38.fa"
-    genome_annotation_file <- "/home/luca/Data/Bio/ensmbl/hg38.gtf"
-    trim_reads_length <- 130
-    #trim_reads(samples_file, trim_reads_length)
-    run_ciri_full(samples_file, genome_file, genome_annotation_file)
 }
