@@ -88,18 +88,3 @@ plot_readlen_hist = function (samples_file, threshold_read_length=0.8, fast=TRUE
         p
     }
 }
-
-#get_readlen_to_trim <- function () {
-#}
-
-#--------------------------------------------------------------------------------
-# Testing
-#--------------------------------------------------------------------------------
-.test_plot_readlen_hist <- function () {
-    #samples_file <- system.file("inst/extdata","samples_VL51.txt", package="EasyCirc")
-    samples_file <- "/home/luca/@focus/_playground/datatest/samples_test.txt"
-    genome_file <- "/home/luca/@focus/_playground/datatest/genome/hg38_chr3_chr7.fa"
-    genome_annotation_file <- "/home/luca/@focus/_playground/datatest/genome/hg38_chr3_chr7.gtf"
-    plot_readlen_hist(samples_file)
-}
-
