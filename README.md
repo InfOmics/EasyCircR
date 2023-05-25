@@ -334,7 +334,7 @@ first step of eisa we filtered `post_gene` by `FDR`.
 ### 6. Further analysis and Shiny  
 
 EasyCirc provides a Shiny app to visualize the connection between
-circRNA-miRNA-gene. The app includes multiple types of filter, the ability to
+circRNA-miRNA-gene. The app includes multiple types of filters, the ability to
 save filtered results in csv/excel and the possibility to further investigate
 reconstructed circRNAs.
 
