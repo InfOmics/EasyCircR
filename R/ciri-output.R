@@ -1,3 +1,27 @@
+#' @title EasyCircR - read CIRI-full output
+#'
+#' @description read CIRI-full output starting from the count matrix and description file stored in the "EasyCirc/circRNA/CIRI-full" directory.
+#'
+#' @author Luca Parmigiani, Antonino Aparo, Simone Avesani
+#' 
+#' @param sampleFile path to tab separated file with three named columns indicating:
+#' two pair-end fastq files and sample name.  Column names are FileName1,
+#' FileName2 and SampleName. A number of samples greater than 2 is required for each condition.
+#'
+#' @param chrMT \code{logical}. \code{FALSE} if the user wants to exclude circRNAs detected on MT chromosome.
+#' 
+#' @return a \code{list} with two elements: \describe{
+#'   \item{circ_df}{a \code{dataframe} containing information like the chromosome, the start and end of the back-spliced junction (BSJ),
+#'   the length of the reconstructed circRNA and the reconstructed sequence.}
+#'   \item{circ_mtx}{is the count matrix of circRNAs.}}
+#'   
+#' @examples 
+#' circ <- read_ciri_output(samples_file)
+#' names(circ)
+#  [1] "circ_df"  "circ_mtx"
+#' circ_df <- circ$circ_df
+#' circ_mtx <- circ$circ_mtx
+#'   
 #' @import dplyr
 #' @importFrom magrittr %>%
 #' @export
@@ -204,29 +228,4 @@ read_ciri_output <- function(sampleFile=NULL, chrMT=T) {
         colnames(circ_mtx) <- c("bsj_id", samplename)
         return(circ_mtx)
     }
-}
-
-#--------------------------------------------------------------------------------
-# TESTING
-#--------------------------------------------------------------------------------
-.testReadCIRIoutput <- function() {
-    #setwd('/home/luca/Work/IOR/work/EasyCirc/R')
-    #sampleFile <- system.file("extdata","samples_VL51.txt", package="EasyCirc")
-    sampleFile <- system.file("extdata","samples_TMD8_PQR.txt", package="EasyCirc")
-
-    genomeFile <- "/home/luca/Data/Bio/ensmbl/hg38.fa"
-    genomeAnnotation <- "/home/luca/Data/Bio/ensmbl/hg38.gtf"
-    trimReadsLength <- 130
-    #trimReads(sampleFile, trimReadsLength)
-    run_ciri_full(sampleFile, genomeFile, genomeAnnotation)
-    #--------------------------------------------------------------------------------
-
-    circ <- read_ciri_output(sampleFile)
-    names(circ)
-    circ_df <- circ$circ_df 
-    circ_mtx <- circ$circ_mtx
-    head(circ_df)
-    head(circ_mtx)
-    nrow(circ_mtx)
-    nrow(circ_df)
 }
