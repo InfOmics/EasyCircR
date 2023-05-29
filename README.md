@@ -63,18 +63,8 @@ the package relies on several dependencies of libraries and tools that must be i
 - bedtools (https://bedtools.readthedocs.io/en/latest/)
 
 Ubuntu users need to install also: 
-- curl
-- libssl-dev
-- libfontconfig1-dev
-- libcurl4-openssl-dev
-- libxml2-dev
+
 - libpoppler-cpp-dev
-- libharfbuzz-dev
-- libfribidi-dev
-- libfreetype6-dev
-- libpng-dev
-- libtiff-dev
-- libjpeg-dev
 - libgit2-dev
 
 Once that all the dependencies are installed EasyCircR can be installed from github using  "devtools" package.
