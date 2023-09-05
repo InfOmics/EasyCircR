@@ -55,7 +55,7 @@ We prodide two ways to download and install EasyCircR package:
 
 ##  Installation from R
 
-the package relies on several dependencies of libraries and tools that must be installed before proceeding with package installation including:
+The package relies on several dependencies of libraries and tools that must be installed before proceeding with package installation including:
 
 - R ( >=4.0 ) 
 - java (suggested: openjdk-11-jre-headless) 
