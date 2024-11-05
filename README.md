@@ -375,5 +375,10 @@ docker run -ti --rm -p 9000:3838 -v /volume_dir:/volume_dir/ savesani/easycircr
 After that the analysis is completed, Shiny app can be run keeping the container active and open the following link in a browser page: http://0.0.0.0:9000
 
 
+## Shiny App functionalities video 
+
+Follow a short video showing the main functionalities of the Shiny web app.
+
+https://github.com/user-attachments/assets/69107fec-30f6-490f-a634-c5632c51ace4
 
 
